@@ -1,0 +1,29 @@
+{
+  "name": "virtualoffice",
+  "version": "1.0.0",
+  "description": "バーチャルオフィス",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node ./esbuild.config.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KataritaTantei/FirebaseRTC.git"
+  },
+  "keywords": [
+    "バーチャルオフィス"
+  ],
+  "author": "KatariyaTantei",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KataritaTantei/FirebaseRTC/issues"
+  },
+  "homepage": "https://github.com/KataritaTantei/FirebaseRTC#readme",
+  "dependencies": {
+    "firebase": "^10.7.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.9"
+  }
+}

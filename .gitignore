@@ -5,6 +5,7 @@
 .idea
 **/node_modules/*
 **/.firebaserc
+public
 
 ### Firebase Patch ###
 .runtimeconfig.json
