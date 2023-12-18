@@ -1,8 +1,5 @@
 {
   "projects": {
-    "default": "fir-rtc-89b99",
-    "webRTC": "fir-rtc-91cc7"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "fir-rtc-91cc7"
+  }
 }
