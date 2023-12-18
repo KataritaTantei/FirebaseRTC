@@ -76,6 +76,7 @@ class VideoChat {
         document.querySelector('#camera-button').addEventListener('click', this.openUserMedia.bind(this));
         document.querySelector('#create-button').addEventListener('click', this.createRoom.bind(this));
         document.querySelector('#join-button').addEventListener('click', this.joinRoom.bind(this));
+        document.querySelector('#hangup-button').addEventListener('click', this.hungup.bind(this));
     }
 
     async openUserMedia() {
