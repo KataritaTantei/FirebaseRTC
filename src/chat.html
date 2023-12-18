@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FirebaseChat</title>
+    <script type="module" src="index.html"></script>
+    <script defer src="chat.js"></script>
+    <link rel="stylesheet" href="chat.css">
+</head>
+
+<body>
+    <h1>FirebaseChat</h1>
+    <div id="chats">
+        <div>
+            <!--
+              formタグの子要素に、requiredを指定したinput要素やtextarea要素と
+              typeをsubmitにしたbutton要素を入れると入力が空のとき警告を表示させられる
+            -->
+            <!-- 投稿者 -->
+            <div>
+                <label for="username">ユーザー名</label><br>
+                <input type="text" name="username" id="username" autocomplete="given-name">
+            </div>
+            <!-- メッセージ入力 -->
+            <div>
+                <label for="message">メッセージ</label><br>
+                <textarea name="message" id="message" cols="30" rows="10" required></textarea>
+            </div>
+            <!-- 送信ボタン -->
+            <button type="submit" id="send-button">送信</button>
+            <!-- チャット履歴 -->
+            <ul id="chat-bord" style="list-style: none;">
+                <li>～チャット履歴～</li>
+            </ul>
+        </div>
+
+        <!-- ビデオ通話の映像を表示する -->
+        <div>
+            <div id="buttons">
+                <button id="camera-button">カメラとマイクを有効化する</button>
+                <button id="create-button" disabled>部屋を作る</button>
+                <button id="join-button" disabled>部屋に接続する</button>
+                <button id="hangup-button" disabled>接続を切る</button>
+            </div>
+            <p id="current-room"></p>
+            <div id="videos">
+                <video id="local-video" autoplay playsinline muted></video>
+                <video id="remote-video" autoplay playsinline></video>
+            </div>
+        </div>
+    </div>
+    <dialog id="room-dialog">
+        <h2>部屋に接続する</h2>
+        <form>
+            <div>
+                <label for="room-id">部屋のIDを入力してください</label>
+                <input type="text" name="roomId" id="room-id" required>
+            </div>
+            <div>
+                <button id="cancel-button">キャンセル</button>
+                <button id="confirm-join-button">確定</button>
+            </div>
+        </form>
+    </dialog>
+    <output></output>
+</body>
+
+</html>

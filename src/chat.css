@@ -1,0 +1,15 @@
+div#chats {
+    display: flex;
+    flex-direction: row;
+}
+
+div#videos {
+    flex-direction: column;
+}
+
+div#videos>video {
+    background-color: black;
+    width: 640px;
+    display: block;
+    margin: 1rem;
+}
