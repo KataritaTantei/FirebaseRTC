@@ -1,10 +1,5 @@
 import { build } from 'esbuild';
-import { copyFile, mkdir } from 'node:fs';
-
-mkdir('public', (err) => {
-    if (err) throw err;
-    console.log('ディレクトリ作成完了: ./public')
-});
+import { copyFile, } from 'node:fs';
 
 build({
     entryPoints: ['src/index.js','src/chat.js'],
