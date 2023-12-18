@@ -2,7 +2,7 @@ import { build } from 'esbuild';
 import { copyFile } from 'node:fs';
 
 build({
-    entryPoints: ['src/index.js'],
+    entryPoints: ['src/index.js','src/chat.js'],
     outdir: 'public',
     bundle: true,
     minify: true,
