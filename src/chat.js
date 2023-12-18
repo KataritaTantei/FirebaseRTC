@@ -307,7 +307,7 @@ class VideoChat {
             this.peerConnection.close();
         }
 
-        document.querySelector('local-video').srcObject = null;
+        document.querySelector('#local-video').srcObject = null;
         document.querySelector('#remote-video').srcObject = null;
         document.querySelector('#camera-button').disabled = false;
         document.querySelector('#join-button').disabled = false;
