@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FirebaseChat</title>
-    <script type="module" src="index.html"></script>
+    <script type="module" src="index.js"></script>
     <script defer src="chat.js"></script>
     <link rel="stylesheet" href="chat.css">
 </head>
@@ -53,7 +53,6 @@
     </div>
     <dialog id="room-dialog">
         <h2>部屋に接続する</h2>
-        <form>
             <div>
                 <label for="room-id">部屋のIDを入力してください</label>
                 <input type="text" name="roomId" id="room-id" required>
@@ -62,7 +61,6 @@
                 <button id="cancel-button">キャンセル</button>
                 <button id="confirm-join-button">確定</button>
             </div>
-        </form>
     </dialog>
     <output></output>
 </body>

@@ -57,16 +57,17 @@ class VideoChat {
     constructor() {
         console.log("Video chat Start!")
 
+        /** @type {RTCConfiguration} */
         this.configuration = {
             iceServers: [
                 {
                     urls: [
-                        'stun:stun1.1.google.com:19302',
-                        'stun:stun2.1.google.com:19302',
+                        'stun:stun1.l.google.com:19302',
+                        'stun:stun2.l.google.com:19302',
                     ],
                 },
             ],
-            iceCAndidatePoolSize: 10,
+            iceCandidatePoolSize: 10,
         };
         this.initialize();
     }
@@ -87,7 +88,9 @@ class VideoChat {
         document.querySelector('#hangup-button').disabled = false;
 
         // 自分と相手が映るVideo要素を取得する
+        /** @type {HTMLVideoElement} */
         const localVideo = document.querySelector('#local-video');
+        /** @type {HTMLVideoElement} */
         const remoteVideo = document.querySelector('#remote-video');
 
         // カメラとマイクを有効化する
@@ -127,9 +130,11 @@ class VideoChat {
 
         // Firestoreのリファレンスを作る
         // 「roomsコレクション > 新しい一意なドキュメント」のリファレンス
-        const roomDoc = doc(collection(dbFirestore, 'rooms'));
+        const roomDocRef = doc(collection(dbFirestore, 'rooms'));
         // 「roomsコレクション > 新しい一意なドキュメント > callerCandidatesコレクション」のリファレンス
-        const callerCandidatesCollection = collection(roomDoc, 'callerCandidates');
+        const callerCandidatesCollectionRef = collection(roomDocRef, 'callerCandidates');
+        // 「roomsコレクション > 新しい一意なドキュメント > calleeCandidateコレクション」のリファレンス
+        const calleeCandidateCollectionRef = collection(roomDocRef, 'calleeCandidates');
 
         this.peerConnection.addEventListener('icecandidate', (e) => {
             if (!e.candidate) {
@@ -139,7 +144,7 @@ class VideoChat {
             console.log('Got candidate: ', e.candidate);
             // 新しい一意なIDのドキュメントを作り、そこにデータを追加する
             // roomsコレクション > 一意なIDのドキュメント > callerCandidatesコレクション > 新しい一意なドキュメント > event.candidate.toJSONのデータ
-            addDoc(callerCandidatesCollection, e.candidate.toJSON());
+            addDoc(callerCandidatesCollectionRef, e.candidate.toJSON());
         });
 
         const offer = await this.peerConnection.createOffer();
@@ -152,10 +157,10 @@ class VideoChat {
                 sdp: offer.sdp,
             },
         };
-        await setDoc(roomDoc, roomWithOffer);
-        this.roomId = roomDoc.id;
-        console.log(`New room created with SDP offer. Room ID: &{roomDoc.id}`);
-        document.querySelector('#currentRoom').innerText = `Current room is ${roomDoc.id} - You are the caller!`;
+        await setDoc(roomDocRef, roomWithOffer);
+        this.roomId = roomDocRef.id;
+        console.log(`New room created with SDP offer. Room ID: ${roomDocRef.id}`);
+        document.querySelector('#current-room').innerText = `Current room is ${roomDocRef.id} - You are the caller!`;
 
         this.peerConnection.addEventListener('track', (e) => {
             console.log('Got remote track:', e.streams[0]);
@@ -165,23 +170,22 @@ class VideoChat {
             });
         });
 
-        onSnapshot(roomDoc, async (snapshot) => {
+        onSnapshot(roomDocRef, async (snapshot) => {
             // 部屋IDのドキュメントの更新されたデータをログ出力する
-            console.log('Got updated romm:', snapshot.data());
+            console.log('Got updated room:', snapshot.data());
             // スナップショットからデータを取得する
             const data = snapshot.data();
             // 現在のピア接続のリモート説明が存在しないかつData.answerが存在する
             if (!this.peerConnection.currentRemoteDescription && data?.answer) {
                 console.log('Got remote description: ', data.answer);
                 // RTCセッションアンサーを作成する
-                const rtcSessionDescription = new rtcSessionDescription(data.answer);
-                // アンサーをもとにコレクションを行う
+                const rtcSessionDescription = new RTCSessionDescription(data.answer);
+                // アンサーをもとにコネクションを行う
                 await this.peerConnection.setRemoteDescription(rtcSessionDescription);
             }
         });
 
-        const calleeCandidateCollection = collection(roomDoc, 'calleeCandidates');
-        onSnapshot(calleeCandidateCollection, (snapshot) => {
+        onSnapshot(calleeCandidateCollectionRef, (snapshot) => {
             snapshot.docChanges().forEach(async (change) => {
                 if (change.type === 'added') {
                     const data = change.doc.data();
@@ -203,28 +207,35 @@ class VideoChat {
         // キャンセルボタンを押したときにダイアログを閉じる
         cancelButton.addEventListener('click', () => {
             roomDialog.close();
-        });
+        }, {once: true});
+
         // 確定ボタンを押したときの処理
         confirmJoinButton.addEventListener('click', async () => {
-            this.roomId = document.querySelector('#room-id').value;
+            this.roomId = /** @type {HTMLInputElement} */ (document.querySelector('#room-id')).value;
             console.log('Join room: ', this.roomId);
 
             document.querySelector('#current-room').innerText = `現在の部屋は${this.roomId} - あなたは受信者です。呼び出された人です。`;
             const output = document.querySelector('output');
             output.value = this.roomId;
-            await joinRoomById(this.roomId);
-        });
+            await this.joinRoomById(this.roomId);
 
-        roomDialog.showModal();
+            roomDialog.close(); // ダイアログを閉じる
+        },{ once: true });
+
+        roomDialog.showModal(); // ダイアログを表示する
     }
 
+    /** 
+     * @param {string} roomId 
+     */
     async joinRoomById(roomId) {
         const roomsCollectionRef = collection(dbFirestore, 'rooms');
         const roomDocRef = doc(roomsCollectionRef, `${roomId}`);
         const roomSnapshot = await getDoc(roomDocRef);
-        console.log('Got room:', roomSnapshot.exists);
+        console.log('Got room:', roomSnapshot.exists());
 
-        if (roomSnapshot.exists) {
+        if (roomSnapshot.exists()) {
+            console.log('部屋が見つかりました',roomSnapshot.data());
             console.log('Create PeerConnection with configuration: ', this.configuration);
             this.peerConnection = new RTCPeerConnection(this.configuration);
             this.registerPeerConnectionListeners();
@@ -232,12 +243,14 @@ class VideoChat {
                 this.peerConnection.addTrack(track, this.localStream);
             });
 
-            const calleeCandidateCollectionReference = collection(roomDocRef, 'calleeCandidates');
+            const calleeCandidateCollectionRef = collection(roomDocRef, 'calleeCandidates');
             this.peerConnection.addEventListener('icecandidate', (e) => {
                 if (!e.candidate) {
                     console.log('Got final candidate!');
                     return;
                 }
+                console.log('Got candidate: ',e.candidate);
+                addDoc(calleeCandidateCollectionRef, e.candidate.toJSON());
             });
 
             this.peerConnection.addEventListener('track', (e) => {
@@ -248,8 +261,10 @@ class VideoChat {
                 });
             });
 
+            // 相手と自分を繋ぐ
             const offer = roomSnapshot.data().offer;
             console.log('Got offer:', offer);
+            /** @deprecated [RTCSessionDescriptionのコンストラクタに引数を指定しての作成方法は非推奨となりました。] */
             await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
             const answer = await this.peerConnection.createAnswer();
             console.log('Created answer:', answer);
@@ -261,14 +276,14 @@ class VideoChat {
                     sdp: answer.sdp,
                 },
             };
-            await updateDoc(roomDocRef, 'roomWithAnswer');
+            await updateDoc(roomDocRef, roomWithAnswer);
 
-            onSnapshot(calleeCandidateCollectionReference, (snapshot) => {
+            onSnapshot(collection(roomDocRef, 'callerCandidates'), (snapshot) => {
                 snapshot.docChanges().forEach(async (change) => {
                     if (change.type === 'added') {
                         const data = change.doc.data();
                         console.log(`Got new remote ICE candidate: ${JSON.stringify(data)}`);
-                        await this.peerConnection.addEventListener(new RTCIceCandidate(data));
+                        await this.peerConnection.addIceCandidate(new RTCIceCandidate(data));
                     }
                 });
             });
@@ -277,7 +292,7 @@ class VideoChat {
 
     registerPeerConnectionListeners() {
         this.peerConnection.addEventListener('icegatheringstatechange', () => {
-            console.log(`ICE gathering state changed: ${this.peerConnection.connectionState}`);
+            console.log(`ICE gathering state changed: ${this.peerConnection.iceGatheringState}`);
         });
 
         this.peerConnection.addEventListener('connectionstatechange', () => {
@@ -285,7 +300,7 @@ class VideoChat {
         });
 
         this.peerConnection.addEventListener('signalingstatechange', () => {
-            console.log(`ICE connection state change: ${this.peerConnection.iceConnectionState}`);
+            console.log(`ICE connection state change: ${this.peerConnection.signalingState}`);
         });
 
         this.peerConnection.addEventListener('iceconnectionstatechange', () => {
