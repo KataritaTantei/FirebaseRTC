@@ -13,3 +13,17 @@ div#videos>video {
     display: block;
     margin: 1rem;
 }
+
+@media(prefers-color-scheme:light){
+    html{
+        background: #333;
+        color: white;
+    }
+}
+
+@media (prefers-color-scheme: dark){
+    html{
+        background: black;
+        color: #ddd;
+    }
+}
