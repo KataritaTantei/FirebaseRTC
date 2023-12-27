@@ -179,7 +179,7 @@ class VideoChat {
             if (!this.peerConnection.currentRemoteDescription && data?.answer) {
                 console.log('Got remote description: ', data.answer);
                 // アンサーをもとにコネクションを行う
-                await this.peerConnection.setRemoteDescription(answer);
+                await this.peerConnection.setRemoteDescription(data.answer);
             }
         });
 
