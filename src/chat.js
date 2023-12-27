@@ -178,10 +178,8 @@ class VideoChat {
             // 現在のピア接続のリモート説明が存在しないかつData.answerが存在する
             if (!this.peerConnection.currentRemoteDescription && data?.answer) {
                 console.log('Got remote description: ', data.answer);
-                // RTCセッションアンサーを作成する
-                const rtcSessionDescription = new RTCSessionDescription(data.answer);
                 // アンサーをもとにコネクションを行う
-                await this.peerConnection.setRemoteDescription(rtcSessionDescription);
+                await this.peerConnection.setRemoteDescription(answer);
             }
         });
 
@@ -264,8 +262,7 @@ class VideoChat {
             // 相手と自分を繋ぐ
             const offer = roomSnapshot.data().offer;
             console.log('Got offer:', offer);
-            /** @deprecated [RTCSessionDescriptionのコンストラクタに引数を指定しての作成方法は非推奨となりました。] */
-            await this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            await this.peerConnection.setRemoteDescription(offer);
             const answer = await this.peerConnection.createAnswer();
             console.log('Created answer:', answer);
             await this.peerConnection.setLocalDescription(answer);
