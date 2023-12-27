@@ -323,7 +323,7 @@ class VideoChat {
         document.querySelector('#remote-video').srcObject = null;
         document.querySelector('#camera-button').disabled = false;
         document.querySelector('#join-button').disabled = false;
-        document.querySelector('#hangup-butoon').disabled = true;
+        document.querySelector('#hangup-button').disabled = false;
         document.querySelector('#current-room').innerText = '';
 
         if (this.roomId) {
